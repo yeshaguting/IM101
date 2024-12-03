@@ -13,13 +13,6 @@ db = mysql.connector.connect(
 cursor = db.cursor()
 
 # Create Tables if they don't exist
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) UNIQUE,
-    password VARCHAR(255)
-)
-""")
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS patients (
@@ -44,7 +37,7 @@ CREATE TABLE IF NOT EXISTS doctors (
 
 db.commit()
 
-# User Interface
+# UI | Main Window
 root = tk.Tk()
 root.title("Hospital Patient Information System")
 root.geometry("1200x700")  # Window Size
@@ -122,7 +115,7 @@ def add_patient():
             VALUES (%s, %s, %s, CURDATE(), %s, %s, %s)
         """, (name, age, gender, room, diagnosis, status))
         db.commit()
-        load_patients()
+        load_patients() # Update patients view
         load_rooms()  # Update room view
         messagebox.showinfo("Success", "Patient added successfully!")
         clear_patient_fields()
@@ -153,7 +146,7 @@ def update_patient():
         """, (name, age, gender, room, diagnosis, status, id))
         db.commit()
         load_patients()
-        load_rooms()  # Update room view
+        load_rooms()
         messagebox.showinfo("Success", "Patient updated successfully!")
         clear_patient_fields()
     else:
@@ -170,7 +163,7 @@ def delete_patient():
     cursor.execute("DELETE FROM patients WHERE id=%s", (values[0],))
     db.commit()
     load_patients()
-    load_rooms()  # Update room view
+    load_rooms()
     messagebox.showinfo("Success", "Patient deleted successfully!")
     clear_patient_fields()
 
@@ -243,8 +236,9 @@ def search():
     for row in room_table.get_children():
         room_table.delete(row)
 
-    # Search patients
+
     if query:
+        # Search patients
         cursor.execute("SELECT * FROM patients WHERE name LIKE %s", (f"%{query}%",))
         patient_rows = cursor.fetchall()
         for patient in patient_rows:
@@ -258,7 +252,7 @@ def search():
 
         # Search rooms
         cursor.execute("""
-            SELECT room, name, admission_date 
+            SELECT room, name, admission_date
             FROM patients 
             WHERE room LIKE %s OR name LIKE %s
             """, (f"%{query}%", f"%{query}%"))
@@ -407,7 +401,7 @@ style.configure(
     "Treeview",
     background="#ffffff",      # White background
     foreground="#000000",      # Black text
-    rowheight=30,              # Increase row height for better spacing
+    rowheight=30,              # For better spacing
     fieldbackground="#ffffff"  # White field background
 )
 style.map("Treeview", background=[("selected", "#BAE0F3")])  # Highlight color on selection
@@ -452,7 +446,7 @@ style.configure("TButton",
                 foreground="white",     # Set button text color
                 font=("Helvetica", 10, "bold"))  # Set font
 
-# Optional: Change hover effect
+# Change hover effect
 style.map("TButton",
           background=[('active', '#2B35AF')],  # Color when hovered
           foreground=[('active', 'white')])     # Text color when hovered
@@ -460,7 +454,7 @@ style.map("TButton",
 # Load initial data
 load_patients()
 load_doctors()
-load_rooms()  # Load room data initially
+load_rooms()
 
 # Bind tab change event
 notebook.bind("<<NotebookTabChanged>>", switch_tab)
